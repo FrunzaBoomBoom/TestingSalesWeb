@@ -176,6 +176,9 @@
             e.preventDefault();
             
             // Get form values
+            const timestamp = e.parameter.timestamp;
+            sheet.appendRow([timestamp, item, vendor, quantity, seller]);
+
             const formData = {
                 item: document.getElementById('item').value,
                 vendor: document.getElementById('vendor').value,
@@ -239,7 +242,7 @@ fetch('https://script.google.com/macros/s/AKfycbwW-Q-tLWpXW34IcNgTj8Szq_dPlblViI
     message.className = 'error';
     message.textContent = `Error: ${error.message}`;
     console.error('Fetch error:', error);
-});    
+
     // Try to get more detailed error response
     if (error.response) {
         error.response.json().then(errData => {
@@ -250,7 +253,7 @@ fetch('https://script.google.com/macros/s/AKfycbwW-Q-tLWpXW34IcNgTj8Szq_dPlblViI
         });
     }
 });
-        
+});        
         // Close modal when clicking outside of it
         window.addEventListener('click', function(event) {
             if (event.target === modal) {
