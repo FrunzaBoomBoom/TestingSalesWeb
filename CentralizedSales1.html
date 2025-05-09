@@ -218,28 +218,37 @@ message.style.display = 'block';
 fetch('https://script.google.com/macros/s/AKfycbwW-Q-tLWpXW34IcNgTj8Szq_dPlblViInyRIssuWpnnhkx4Lw93-GU7CnbA0iiD6FAmg/exec', {
     method: 'POST',
     headers: {
-    'Content-Type': 'application/json'
-  },
-  body: JSON.stringify({
-    item: document.getElementById('item').value,
-    vendor: document.getElementById('vendor').value,
-    quantity: document.getElementById('quantity').value,
-    seller: document.getElementById('seller').value
-  }),
-  redirect: 'follow' // Important for Google Apps Script
+        'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(formData)
 })
-.then(response => response.json())
+.then(response => {
+    if (!response.ok) {
+        throw new Error('Network response was not ok');
+    }
+    return response.json();
+})
 .then(data => {
-  console.log(data);
-  if(data.result === "success") {
-    alert("Data saved successfully!");
-  } else {
-    alert("Error: " + data.error);
-  }
+    message.className = 'success';
+    message.textContent = 'Data submitted successfully';
+    
+    // Clear the form
+    document.getElementById('salesForm').reset();
 })
-.catch(error => {
-  console.error("Fetch error:", error);
-  alert("Failed to send data. Check console for details.");
+.catch((error) => {
+    message.className = 'error';
+    message.textContent = `Error: ${error.message}`;
+    console.error('Fetch error:', error);
+});    
+    // Try to get more detailed error response
+    if (error.response) {
+        error.response.json().then(errData => {
+            console.error('Server error details:', errData);
+            message.textContent += ` | Server error: ${JSON.stringify(errData)}`;
+        }).catch(err => {
+            console.error('Error parsing response:', err);
+        });
+    }
 });
         
         // Close modal when clicking outside of it
