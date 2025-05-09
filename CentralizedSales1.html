@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sales Data Entry</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        input, select {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            width: 100%;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        #message {
+            margin-top: 20px;
+            padding: 10px;
+            border-radius: 4px;
+            display: none;
+        }
+        .success {
+            background-color: #dff0d8;
+            color: #3c763d;
+            display: block;
+        }
+        .error {
+            background-color: #f2dede;
+            color: #a94442;
+            display: block;
+        }
+        
+        /* Modal styles */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0,0,0,0.4);
+        }
+        .modal-content {
+            background-color: #fefefe;
+            margin: 15% auto;
+            padding: 20px;
+            border: 1px solid #888;
+            width: 80%;
+            max-width: 500px;
+            border-radius: 5px;
+        }
+        .modal-buttons {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 20px;
+        }
+        .modal-button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .confirm {
+            background-color: #4CAF50;
+            color: white;
+        }
+        .cancel {
+            background-color: #f44336;
+            color: white;
+        }
+        .data-review {
+            margin: 15px 0;
+            padding: 10px;
+            background-color: #f8f9fa;
+            border-radius: 4px;
+        }
+        .data-review p {
+            margin: 5px 0;
+        }
+    </style>
+</head>
+<body>
+    <h1>Sales Data Entry</h1>
+    <form id="salesForm">
+        <div class="form-group">
+            <label for="item">Item Sold:</label>
+            <input type="text" id="item" name="item" required>
+        </div>
+        
+        <div class="form-group">
+            <label for="vendor">Vendor:</label>
+            <input type="text" id="vendor" name="vendor" required>
+        </div>
+        
+        <div class="form-group">
+            <label for="quantity">Quantity Sold:</label>
+            <input type="number" id="quantity" name="quantity" required min="1">
+        </div>
+        
+        <div class="form-group">
+            <label for="seller">Seller:</label>
+            <input type="text" id="seller" name="seller" required>
+        </div>
+        
+        <button type="submit">Submit Data</button>
+    </form>
+    
+    <div id="message"></div>
+    
+    <!-- Confirmation Modal -->
+    <div id="confirmationModal" class="modal">
+        <div class="modal-content">
+            <h2>Confirm Submission</h2>
+            <p>Are you sure the data you entered is correct?</p>
+            
+            <div class="data-review">
+                <p><strong>Item Sold:</strong> <span id="reviewItem"></span></p>
+                <p><strong>Vendor:</strong> <span id="reviewVendor"></span></p>
+                <p><strong>Quantity Sold:</strong> <span id="reviewQuantity"></span></p>
+                <p><strong>Seller:</strong> <span id="reviewSeller"></span></p>
+                <p><strong>Submission Time:</strong> <span id="reviewTime"></span></p>
+            </div>
+            
+            <div class="modal-buttons">
+                <button class="modal-button cancel" id="cancelButton">No, Go Back</button>
+                <button class="modal-button confirm" id="confirmButton">Yes, Submit</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Get modal elements
+        const modal = document.getElementById('confirmationModal');
+        const cancelButton = document.getElementById('cancelButton');
+        const confirmButton = document.getElementById('confirmButton');
+        
+        // Format date and time
+        function formatDateTime() {
+            const now = new Date();
+            return now.toLocaleString();
+        }
+        
+        document.getElementById('salesForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            // Get form values
+            const formData = {
+                item: document.getElementById('item').value,
+                vendor: document.getElementById('vendor').value,
+                quantity: document.getElementById('quantity').value,
+                seller: document.getElementById('seller').value,
+                timestamp: formatDateTime()
+            };
+            
+            // Display data in confirmation modal
+            document.getElementById('reviewItem').textContent = formData.item;
+            document.getElementById('reviewVendor').textContent = formData.vendor;
+            document.getElementById('reviewQuantity').textContent = formData.quantity;
+            document.getElementById('reviewSeller').textContent = formData.seller;
+            document.getElementById('reviewTime').textContent = formData.timestamp;
+            
+            // Show modal
+            modal.style.display = 'block';
+            
+            // Store form data for later use
+            confirmButton.dataset.formData = JSON.stringify(formData);
+        });
+        
+        // Cancel button closes modal
+        cancelButton.addEventListener('click', function() {
+            modal.style.display = 'none';
+        });
+        
+        // Confirm button submits data
+        confirmButton.addEventListener('click', function() {
+            modal.style.display = 'none';
+            const formData = JSON.parse(confirmButton.dataset.formData);
+            
+            // Show loading state
+            const message = document.getElementById('message');
+message.className = '';
+message.textContent = 'Submitting data...';
+message.style.display = 'block';
+
+// Send data to Google Apps Script
+fetch('https://script.google.com/macros/s/AKfycbzpPaOxt2d8D-cVpNQgrc3AKPEzvfsVT-kTnglokouocnnW9i3RZHZvPhFdSgFEfj87Eg/exec', {
+    method: 'POST',
+    headers: {
+        'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(formData)
+})
+.then(response => {
+    if (!response.ok) {
+        throw new Error('Network response was not ok');
+    }
+    return response.json();
+})
+.then(data => {
+    message.className = 'success';
+    message.textContent = 'Data submitted successfully';
+    
+    // Clear the form
+    document.getElementById('salesForm').reset();
+})
+.catch((error) => {
+    message.className = 'error';
+    message.textContent = `Error: ${error.message}`;
+    console.error('Fetch error:', error);
+});    
+    // Try to get more detailed error response
+    if (error.response) {
+        error.response.json().then(errData => {
+            console.error('Server error details:', errData);
+            message.textContent += ` | Server error: ${JSON.stringify(errData)}`;
+        }).catch(err => {
+            console.error('Error parsing response:', err);
+        });
+    }
+});
+        
+        // Close modal when clicking outside of it
+        window.addEventListener('click', function(event) {
+            if (event.target === modal) {
+                modal.style.display = 'none';
+            }
+        });
+    </script>
+</body>
+</html>
